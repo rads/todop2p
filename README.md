@@ -11,3 +11,8 @@ Compare P2P libraries.
 - Replicate to other peers using a WebSocket server
 
 ## Libraries
+
+- Clojure
+  - [replikativ](https://github.com/rads/todop2p/tree/master/examples/replikativ)
+- JavaScript
+  - [hyperlog](https://github.com/rads/todop2p/tree/master/examples/hyperlog)
