@@ -1,6 +1,6 @@
 # TodoP2P
 
-Compare P2P frameworks.
+Compare P2P libraries.
 
 ## Requirements
 
@@ -9,3 +9,5 @@ Compare P2P frameworks.
 - Allow the names of the items to be edited
 - Allow the user to add new items to the end
 - Replicate to other peers using a WebSocket server
+
+## Libraries
