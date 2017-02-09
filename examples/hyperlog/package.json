@@ -2,15 +2,18 @@
   "name": "todop2p-hyperlog",
   "private": true,
   "version": "0.0.1",
+  "scripts": {
+    "start": "bin/server"
+  },
   "dependencies": {
     "async": "2.1.4",
+    "browserify": "14.0.0",
+    "http-server": "0.9.0",
     "hyperlog": "4.12.1",
     "memdown": "1.2.4",
     "react": "15.4.2",
-    "react-dom": "15.4.2"
-  },
-  "devDependencies": {
-    "browserify": "14.0.0",
+    "react-dom": "15.4.2",
+    "serve": "3.2.7",
     "watchify": "3.9.0"
   }
 }

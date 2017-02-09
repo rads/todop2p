@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+cd `dirname $0`/..
+
+make
+./node_modules/.bin/http-server public --port 3000
