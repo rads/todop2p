@@ -5,25 +5,10 @@ var memdown = require('memdown');
 var fruitdown = require('fruitdown');
 var levelup = require('levelup');
 var async = require('async');
+var websocket = require('websocket-stream');
+var JSONStream = require('JSONStream');
 
 var e = React.createElement;
-
-function addItems(log) {
-  async.waterfall([
-    function(done) {
-      log.add(null, Date.now() + 'a', done);
-    },
-    function(node, done) {
-      log.add([node.key], 'b', done);
-    },
-    function(node, done) {
-      log.add([node.key], 'c', done);
-    }
-  ], function(err) {
-    if (err) throw err;
-    console.log('done adding');
-  });
-}
 
 var TodoList = React.createClass({
   getInitialState: function() {
@@ -48,10 +33,17 @@ var TodoList = React.createClass({
   }
 });
 
-var db = levelup('todoList', {db: fruitdown});
-var log = hyperlog(db, {valueEncoding: 'json'});
+var db = levelup('todoList', {db: memdown});
+var log = hyperlog(db, {valueEncoding: 'json', id: String(Date.now())});
 
+var ws = websocket('ws://' + location.host);
+var replicator = log.replicate({live: true, frame: false});
+replicator.pipe(ws).pipe(replicator);
+
+var i = 0;
 var container = document.getElementById('container');
 
 ReactDOM.render(e(TodoList, {log: log}), container);
-addItems(log);
+document.onclick = function() {
+  log.add(null, log.id + ' ' + i++);
+};

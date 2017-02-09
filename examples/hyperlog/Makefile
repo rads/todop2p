@@ -1,9 +1,10 @@
+CLIENT := client.js
 BUILD := public/build.js
 
-$(BUILD): index.js
-	./node_modules/.bin/browserify index.js > $@
+$(BUILD): $(CLIENT)
+	./node_modules/.bin/browserify $(CLIENT) > $(BUILD)
 
 watch:
-	./node_modules/.bin/watchify -vo $(BUILD) index.js
+	./node_modules/.bin/watchify -vo $(BUILD) $(CLIENT)
 
 .PHONY: watch
