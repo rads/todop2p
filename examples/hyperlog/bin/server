@@ -3,4 +3,4 @@
 cd `dirname $0`/..
 
 make
-./node_modules/.bin/http-server public --port 3000
+./node_modules/.bin/http-server public -p 3000
