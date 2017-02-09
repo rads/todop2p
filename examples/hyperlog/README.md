@@ -6,4 +6,4 @@
 npm start
 ```
 
-Now go to [https://localhost:3000](https://localhost:3000).
+Now go to [http://localhost:3000](http://localhost:3000).
