@@ -1,4 +1,4 @@
-# TodoP2P Examples: hyperlog
+# TodoP2P: hyperlog
 
 ## Getting Started
 
