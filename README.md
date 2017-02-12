@@ -15,4 +15,5 @@ Compare P2P libraries.
 - Clojure
   - [replikativ](https://github.com/rads/todop2p/tree/master/examples/replikativ)
 - JavaScript
+  - [crdt](https://github.com/rads/todop2p/tree/master/examples/crdt)
   - [hyperlog](https://github.com/rads/todop2p/tree/master/examples/hyperlog)
