@@ -18,3 +18,9 @@ Compare P2P libraries.
   - [crdt](https://github.com/rads/todop2p/tree/master/examples/crdt)
   - [hyperlog](https://github.com/rads/todop2p/tree/master/examples/hyperlog)
   - [r-array](https://github.com/rads/todop2p/tree/master/examples/r-array)
+
+## Contributions
+
+If you'd like to add a library to the list above, [make a new issue][new-issue].
+
+[new-issue]: https://github.com/rads/todop2p/issues/new
