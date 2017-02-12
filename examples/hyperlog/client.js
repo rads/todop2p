@@ -7,6 +7,9 @@ var levelup = require('levelup');
 var async = require('async');
 var websocket = require('websocket-stream');
 var JSONStream = require('JSONStream');
+var between = require('between');
+var hyperseq = require('./hyperseq');
+var shuffle = require('shuffle-array');
 
 var e = React.createElement;
 
@@ -19,8 +22,7 @@ var TodoList = React.createClass({
     var log = this.props.log;
 
     log.createReadStream({live: true}).on('data', function(node) {
-      var added = this.state.items.concat([node]);
-      this.setState({items: added});
+      this.setState({items: this.props.seq.sorted});
     }.bind(this));
   },
 
@@ -40,10 +42,46 @@ var ws = websocket('ws://' + location.host);
 var replicator = log.replicate({live: true, frame: false});
 replicator.pipe(ws).pipe(replicator);
 
-var i = 0;
 var container = document.getElementById('container');
 
-ReactDOM.render(e(TodoList, {log: log}), container);
+function render(props) {
+  ReactDOM.render(e(TodoList, props), container);
+}
+
+var i = 0;
+var seq = hyperseq(log);
+
 document.onclick = function() {
-  log.add(null, log.id + ' ' + i++);
+  seq.push(log.id + ' ' + i++, function(err){
+    if (err) throw err;
+    render({log: log, seq: seq});
+  });
 };
+
+document.onclick = function() {
+  var item = (seq.id + ' ' + i++);
+  if ((i % 2) === 0) {
+    seq.before(seq.sorted[0], item, function(){});
+  } else {
+    seq.after(seq.sorted[seq.sorted.length - 1], item, function(){});
+  }
+};
+
+window.shuffleItems = function() {
+  var arr = [];
+  function shift(done) {
+    arr.push(seq.shift(function(err) {
+      if (err) throw err;
+      if (seq.sorted.length > 0) return shift(done);
+      done();
+    }));
+  }
+  shift(function() {
+    arr = shuffle(arr);
+    while (arr.length > 0) {
+      seq.push(arr.shift(),function(){});
+    }
+  });
+}
+
+render({log: log, seq: seq});
