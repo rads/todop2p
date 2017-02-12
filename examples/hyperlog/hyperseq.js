@@ -1,74 +1,58 @@
-var sortBy = require('sort-by');
 var cuid = require('cuid');
-var between = require('between');
 
 function Hyperseq(log) {
   this.log = log;
   this.head = null;
   this.sorted = [];
+  this.length = 0;
+  this.seqID = cuid();
 
   var stream = this.log.createReadStream({live: true});
 
   stream.on('data', function(node) {
-    if (node.value._sort) {
-      this.sorted.push(node);
-      this.sorted.sort(sortBy('value._sort'));
-    } else if (node.value.shift) {
-      this.sorted.shift();
-    }
+    this.head = node;
+    if (node.value.seqID === this.seqID) return;
+    this._applyCommit(node.value);
   }.bind(this));
 }
 
-Hyperseq.prototype._add = function(item, lo, hi, done) {
-  var row = {
-    id: cuid(),
-    item: item,
-    _sort: between(lo, hi)
-  };
+Hyperseq.prototype._applyCommit = function(commit) {
+  var result, data, args;
 
-  var afterAdd = function(err, node) {
-    if (err) return done(err);
-    this.head = node;
-    done(null);
-  }.bind(this);
+  switch (commit.action) {
+    case 'splice':
+      data = commit.data;
+      args = [data.start, data.deleteCount].concat(data.items ? data.items : []);
+      result = this.sorted.splice.apply(this.sorted, args);
+      break;
+  }
 
-  var links = this.head ? [this.head.key] : [];
+  this.length = this.sorted.length;
 
-  this.log.add(links, row, {}, afterAdd);
+  return result;
 };
 
-Hyperseq.prototype.push = function(item, done) {
-  var lo = this.sorted.length ? this.sorted[this.sorted.length - 1].value._sort : between.lo;
-  var hi = between.hi;
-  this._add(item, lo, hi, done);
+Hyperseq.prototype.splice = function(start, deleteCount, items, done) {
+  if (!done) done = function(){};
+  var item = {start: start, deleteCount: deleteCount, items: items};
+  return this._commit('splice', item, done);
 };
 
-Hyperseq.prototype.before = function(node, item, done) {
-  var idx = this.sorted.findIndex(function(r) {
-    return node && r.value.id === node.value.id;
-  });
-  var lo = this.sorted[idx-1] ? this.sorted[idx-1].value._sort : between.lo;
-  var hi = this.sorted[idx] ? this.sorted[idx].value._sort : between.hi;
-  this._add(item, lo, hi, done);
+Hyperseq.prototype._commit = function(action, data, done) {
+  var links = this.head ? [this.head.key] : null;
+  var commit = {seqID: this.seqID, action: action, data: data};
+  this.log.add(links, commit, {}, done);
+  return this._applyCommit(commit);
 };
 
-Hyperseq.prototype.after = function(node, item, done) {
-  var idx = this.sorted.findIndex(function(r) {
-    return node && r.value.id === node.value.id;
-  });
-  var lo = this.sorted[idx] ? this.sorted[idx].value._sort : between.lo;
-  var hi = this.sorted[idx+1] ? this.sorted[idx+1].value._sort : between.hi;
-  this._add(item, lo, hi, done);
+Hyperseq.prototype.push = function(item) {
+  var length = this.sorted.length;
+  this.splice(length, 0, [item]);
+  return length + 1;
 };
 
-Hyperseq.prototype.shift = function(done) {
-  var links = this.head ? [this.head.key] : [];
-  this.log.add(links, {shift: true}, function(err, node) {
-    if (err) return done(err);
-    this.head = node;
-    done(null);
-  });
-  return this.sorted[0];
+Hyperseq.prototype.shift = function() {
+  return this.splice(0, 1);
 };
 
 function hyperseq(log) {

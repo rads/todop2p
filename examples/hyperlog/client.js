@@ -10,6 +10,7 @@ var JSONStream = require('JSONStream');
 var between = require('between');
 var hyperseq = require('./hyperseq');
 var shuffle = require('shuffle-array');
+var cuid = require('cuid');
 
 var e = React.createElement;
 
@@ -59,29 +60,23 @@ document.onclick = function() {
 };
 
 document.onclick = function() {
-  var item = (seq.id + ' ' + i++);
+  var item = {key: cuid(), value: (seq.id + ' ' + i++)};
   if ((i % 2) === 0) {
-    seq.before(seq.sorted[0], item, function(){});
+    seq.splice(0, 0, [item]);
   } else {
-    seq.after(seq.sorted[seq.sorted.length - 1], item, function(){});
+    seq.splice(seq.sorted.length, 0, [item]);
   }
 };
 
 window.shuffleItems = function() {
   var arr = [];
-  function shift(done) {
-    arr.push(seq.shift(function(err) {
-      if (err) throw err;
-      if (seq.sorted.length > 0) return shift(done);
-      done();
-    }));
+  while (seq.length > 0) {
+    arr.push(seq.shift());
   }
-  shift(function() {
-    arr = shuffle(arr);
-    while (arr.length > 0) {
-      seq.push(arr.shift(),function(){});
-    }
-  });
+  arr = shuffle(arr);
+  while (arr.length > 0) {
+    seq.push(arr.shift());
+  }
 }
 
 render({log: log, seq: seq});
