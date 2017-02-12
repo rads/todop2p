@@ -17,3 +17,4 @@ Compare P2P libraries.
 - JavaScript
   - [crdt](https://github.com/rads/todop2p/tree/master/examples/crdt)
   - [hyperlog](https://github.com/rads/todop2p/tree/master/examples/hyperlog)
+  - [r-array](https://github.com/rads/todop2p/tree/master/examples/r-array)
